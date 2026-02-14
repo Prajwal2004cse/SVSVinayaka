@@ -52,13 +52,18 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ================= Test Route =================
-app.get("/", (req, res) => {
-  res.send("Digital Seva Backend Running 🚀");
+// app.get("/", (req, res) => {
+//   res.send("Digital Seva Backend Running 🚀");
+// });
+
+app.get("/test", (req, res) => {
+  res.json({ status: "Backend working" });
 });
+
 
 // ================= Start Server =================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0"() => {
   console.log(`Server running on port ${PORT}`);
 });
