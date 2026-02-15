@@ -151,6 +151,8 @@ import AdminPoster from "./pages/admin/AdminPoster"; // ✅ ADD THIS
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import { FaWhatsapp } from "react-icons/fa";
+import { Navigate } from "react-router-dom";
+
 
 function App() {
 
@@ -238,6 +240,12 @@ function App() {
             }
           />
 
+          <Route
+  path="/admin"
+  element={<Navigate to="/admin/dashboard" replace />}
+/>
+
+
         </Routes>
 
       </BrowserRouter>
@@ -248,7 +256,7 @@ function App() {
         onClick={async () => {
 
           try {
-            await fetch("http://localhost:5000/api/leads", {
+            await fetch(`${process.env.REACT_APP_API_URL}/api/leads`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
