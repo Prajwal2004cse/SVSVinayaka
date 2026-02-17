@@ -548,7 +548,7 @@ max-w-[260px] sm:max-w-[320px] md:max-w-[400px] bg-white p-5 rounded-xl shadow-m
 
       <div className="space-y-4 text-gray-400">
 
-        <p>📞 +91 9482272307</p>
+        <p>📞 +91 9448228308</p>
 
         <p>
           📍 1st Floor, Rudraswamy Complex,<br />
