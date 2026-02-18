@@ -80,10 +80,13 @@ const loadDocs = async (id) => {
 
 
   // ---------------- FILTER ----------------
-  const filtered = services.filter(s =>
-    (category === "All" || s.category === category) &&
-    s.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = Array.isArray(services)
+  ? services.filter(s =>
+      (category === "All" || s.category === category) &&
+      s.name.toLowerCase().includes(search.toLowerCase())
+    )
+  : [];
+
 
 
 
@@ -124,7 +127,8 @@ const loadDocs = async (id) => {
       {/* ---------------- SERVICE CARDS ---------------- */}
       <div className="max-w-7xl mx-auto grid sm:grid-cols-2 md:grid-cols-3 gap-6">
 
-        {filtered.map(service => (
+        {Array.isArray(filtered) && filtered.map(service => (
+
 
           <div
             key={service.id}
