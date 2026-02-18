@@ -36,9 +36,8 @@ function Services() {
   }, []);
 
 
-
-// ---------------- LOAD DOCUMENTS ----------------
-const loadDocs = async (id) => {
+--//Load Documents//--
+  const loadDocs = async (id) => {
 
   try {
 
@@ -50,16 +49,18 @@ const loadDocs = async (id) => {
 
     console.log("Documents API response:", data);
 
-    // SAFE handling for Railway backend response
+    // ✅ FIX: support Railway format
     if (Array.isArray(data)) {
 
       setDocs(data);
 
-    } else if (data.success && Array.isArray(data.data)) {
+    } 
+    else if (data.success && Array.isArray(data.data)) {
 
       setDocs(data.data);
 
-    } else {
+    } 
+    else {
 
       setDocs([]);
 
@@ -70,10 +71,13 @@ const loadDocs = async (id) => {
   } catch (err) {
 
     console.error("Docs load failed:", err);
+
     setDocs([]);
+
     setShow(true);
 
   }
+
 };
 
 
