@@ -10,7 +10,6 @@ function Services() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
-  // Get token (for protected routes)
   const token = localStorage.getItem("adminToken");
 
 
@@ -21,8 +20,9 @@ function Services() {
       .then(res => res.json())
       .then(data => {
 
-        if (Array.isArray(data)) {
-          setServices(data);
+        // FIX: backend returns { success, count, data }
+        if (data.success && Array.isArray(data.data)) {
+          setServices(data.data);
         } else {
           setServices([]);
         }
@@ -61,6 +61,8 @@ function Services() {
 
       if (Array.isArray(data)) {
         setDocs(data);
+      } else if (data.data && Array.isArray(data.data)) {
+        setDocs(data.data);
       } else {
         setDocs([]);
       }
@@ -136,7 +138,7 @@ function Services() {
               {service.image ? (
 
                 <img
-                  src={`http://localhost:5000${service.image}`}
+                  src={`${process.env.REACT_APP_API_URL}${service.image}`}
                   alt={service.name}
                   className="w-24 h-24 object-cover rounded-full border shadow"
                 />
@@ -218,7 +220,7 @@ function Services() {
 
               <ul className="space-y-2">
 
-                {Array.isArray(docs) && docs.map(d => (
+                {docs.map(d => (
 
                   <li
                     key={d.id}
