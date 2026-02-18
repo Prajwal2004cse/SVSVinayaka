@@ -40,7 +40,7 @@ router.post("/", verifyToken, async (req, res) => {
 
 
 // ---------------- GET DOCUMENTS ----------------
-router.get("/:id", verifyToken, async (req, res) => {
+router.get("/:id", async (req, res) => {
 
   try {
 
@@ -58,8 +58,10 @@ router.get("/:id", verifyToken, async (req, res) => {
     res.status(500).json({
       message: "Failed to load documents",
     });
+
   }
-});
+
+});  
 
 
 

@@ -10,7 +10,6 @@ function Services() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
-  const token = localStorage.getItem("adminToken");
 
 
   // ---------------- LOAD SERVICES ----------------
@@ -36,7 +35,7 @@ function Services() {
   }, []);
 
 
---//Load Documents//--
+//Load Documents
   const loadDocs = async (id) => {
 
   try {
