@@ -17,34 +17,46 @@ function AdminServices() {
     return localStorage.getItem("adminToken");
   };
 
-  // Load services
-  const loadServices = async () => {
+// Load services
+const loadServices = async () => {
 
-    try {
+  try {
 
-      const token = getToken();
+    const token = getToken();
 
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/services`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/services`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      const data = await res.json();
+    const data = await res.json();
 
-      setServices(data);
+    console.log("Admin services response:", data);
 
-    } catch (err) {
-      console.error("Load services error:", err);
+    // ✅ FIX HERE
+    if (data?.success && Array.isArray(data.data)) {
+      setServices(data.data);
     }
-  };
+    else if (Array.isArray(data)) {
+      setServices(data);
+    }
+    else {
+      setServices([]);
+    }
 
-  useEffect(() => {
-    loadServices();
-  }, []);
+  } catch (err) {
+
+    console.error("Load services error:", err);
+    setServices([]);
+
+  }
+
+};
+
 
   // Add / Update Service
   const saveService = async () => {
@@ -263,7 +275,7 @@ function AdminServices() {
 
               ) : (
 
-                services.map((s) => (
+                Array.isArray(services) && services.map((s) => (
 
                   <tr
                     key={s.id}
@@ -276,7 +288,7 @@ function AdminServices() {
                       {s.image ? (
 
                         <img
-                          src={`http://localhost:5000${s.image}`}
+                          src={`${process.env.REACT_APP_API_URL}${s.image}`}
                           alt={s.name}
                           className="w-12 h-12 rounded-full object-cover mx-auto"
                         />

@@ -10,79 +10,84 @@ function Services() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
-  const API = process.env.REACT_APP_API_URL;
+  const token = localStorage.getItem("adminToken");
 
-  // ================= LOAD SERVICES =================
+
+  // ---------------- LOAD SERVICES ----------------
   useEffect(() => {
 
-    const loadServices = async () => {
-      try {
+    fetch(`${process.env.REACT_APP_API_URL}/api/services`)
+      .then(res => res.json())
+      .then(data => {
 
-        const res = await fetch(`${API}/api/services`);
-        const data = await res.json();
-
-        console.log("Services API response:", data);
-
-        // Handle ALL possible response formats safely
-        if (data?.success && Array.isArray(data.data)) {
+        // FIX: backend returns { success, count, data }
+        if (data.success && Array.isArray(data.data)) {
           setServices(data.data);
-        }
-        else if (Array.isArray(data)) {
-          setServices(data);
-        }
-        else {
+        } else {
           setServices([]);
         }
 
-      } catch (err) {
+      })
+      .catch(err => {
         console.error("Service load error:", err);
         setServices([]);
-      }
-    };
+      });
 
-    loadServices();
-
-  }, [API]);
+  }, []);
 
 
-  // ================= LOAD DOCUMENTS =================
-  const loadDocs = async (id) => {
 
-    try {
+// ---------------- LOAD DOCUMENTS ----------------
+const loadDocs = async (id) => {
 
-      const res = await fetch(`${API}/api/documents/${id}`);
-      const data = await res.json();
+  try {
 
-      console.log("Documents API response:", data);
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/documents/${id}`
+    );
 
-      if (data?.success && Array.isArray(data.data)) {
-        setDocs(data.data);
-      }
-      else if (Array.isArray(data)) {
-        setDocs(data);
-      }
-      else {
-        setDocs([]);
-      }
+    const data = await res.json();
 
-      setShow(true);
+    console.log("Documents API response:", data);
 
-    } catch (err) {
-      console.error("Docs load failed:", err);
+    // SAFE handling for Railway backend response
+    if (Array.isArray(data)) {
+
+      setDocs(data);
+
+    } else if (data.success && Array.isArray(data.data)) {
+
+      setDocs(data.data);
+
+    } else {
+
       setDocs([]);
-      setShow(true);
+
     }
-  };
+
+    setShow(true);
+
+  } catch (err) {
+
+    console.error("Docs load failed:", err);
+    setDocs([]);
+    setShow(true);
+
+  }
+};
 
 
-  // ================= SAFE FILTER =================
+
+
+  // ---------------- FILTER ----------------
   const filtered = Array.isArray(services)
-    ? services.filter(s =>
-        s?.name &&
-        (category === "All" || s.category === category) &&
-        s.name.toLowerCase().includes(search.toLowerCase())
-      )
-    : [];
+  ? services.filter(s =>
+      (category === "All" || s.category === category) &&
+      s.name.toLowerCase().includes(search.toLowerCase())
+    )
+  : [];
+
+
 
 
   return (
@@ -91,6 +96,7 @@ function Services() {
       <h2 className="text-4xl font-bold text-center mb-12">
         Our Services
       </h2>
+
 
       {/* Search + Filter */}
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-4 mb-10">
@@ -116,48 +122,58 @@ function Services() {
 
       </div>
 
-      {/* ================= SERVICE CARDS ================= */}
+
+
+      {/* ---------------- SERVICE CARDS ---------------- */}
       <div className="max-w-7xl mx-auto grid sm:grid-cols-2 md:grid-cols-3 gap-6">
 
         {Array.isArray(filtered) && filtered.map(service => (
 
+
           <div
             key={service.id}
-            className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow hover:shadow-xl transition flex flex-col"
+            className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow
+                       hover:shadow-xl transition flex flex-col"
           >
 
-            {/* Image */}
+            {/* ---------- SERVICE IMAGE ---------- */}
             <div className="flex justify-center mb-4">
 
-              {service?.image ? (
+              {service.image ? (
 
                 <img
-                  src={`${API}${service.image}`}
+                  src={`${process.env.REACT_APP_API_URL}${service.image}`}
                   alt={service.name}
                   className="w-24 h-24 object-cover rounded-full border shadow"
                 />
 
               ) : (
 
-                <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                <div className="w-24 h-24 rounded-full bg-gray-100
+                                flex items-center justify-center text-gray-400">
+
                   <FaFileAlt size={32} />
+
                 </div>
 
               )}
 
             </div>
 
-            {/* Title */}
+
+            {/* ---------- TITLE ---------- */}
             <h3 className="font-semibold text-lg text-center mb-2">
-              {service?.name}
+              {service.name}
             </h3>
 
-            {/* Description */}
+
+            {/* ---------- DESCRIPTION ---------- */}
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 text-center flex-grow">
-              {service?.description}
+              {service.description}
             </p>
 
-            {/* Actions */}
+
+            {/* ---------- ACTIONS ---------- */}
             <div className="flex justify-between items-center mt-4">
 
               <button
@@ -184,7 +200,9 @@ function Services() {
 
       </div>
 
-      {/* ================= DOCUMENT MODAL ================= */}
+
+
+      {/* ---------------- DOCUMENTS MODAL ---------------- */}
       {show && (
 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -195,27 +213,38 @@ function Services() {
               Required Documents
             </h3>
 
-            {Array.isArray(docs) && docs.length > 0 ? (
 
-              <ul className="space-y-2">
-                {docs.map(d => (
-                  <li key={d.id} className="flex items-center gap-2">
-                    📄 {d.document_name}
-                  </li>
-                ))}
-              </ul>
-
-            ) : (
+            {docs.length === 0 ? (
 
               <p className="text-gray-500 text-center">
                 No documents available.
               </p>
 
+            ) : (
+
+              <ul className="space-y-2">
+
+                {Array.isArray(docs) && docs.map(d => (
+
+
+                  <li
+                    key={d.id}
+                    className="flex items-center gap-2"
+                  >
+                    📄 {d.document_name}
+                  </li>
+
+                ))}
+
+              </ul>
+
             )}
+
 
             <button
               onClick={() => setShow(false)}
-              className="mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+              className="mt-6 w-full bg-blue-600 text-white py-2 rounded
+                         hover:bg-blue-700 transition"
             >
               Close
             </button>
