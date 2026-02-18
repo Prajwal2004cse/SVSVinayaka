@@ -10,19 +10,14 @@ function Documents() {
 
   const [loading, setLoading] = useState(false);
 
-  // Get token
   const token = localStorage.getItem("adminToken");
 
-
-
-  // Common headers
   const authHeaders = {
     Authorization: `Bearer ${token}`,
   };
 
 
-
-  // Load services
+  // ================= LOAD SERVICES =================
   useEffect(() => {
 
     const loadServices = async () => {
@@ -36,16 +31,29 @@ function Documents() {
           }
         );
 
-        if (!res.ok) throw new Error("Failed to load services");
-
         const data = await res.json();
 
-        setServices(data);
+        console.log("Admin services response:", data);
+
+        // FIX: Railway response
+        if (data?.success && Array.isArray(data.data)) {
+
+          setServices(data.data);
+
+        } else if (Array.isArray(data)) {
+
+          setServices(data);
+
+        } else {
+
+          setServices([]);
+
+        }
 
       } catch (err) {
 
         console.error("Service load error:", err);
-        alert("Failed to load services");
+        setServices([]);
 
       }
     };
@@ -56,7 +64,7 @@ function Documents() {
 
 
 
-  // Load docs
+  // ================= LOAD DOCUMENTS =================
   const loadDocs = async (id) => {
 
     if (!id) return;
@@ -72,46 +80,61 @@ function Documents() {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to load docs");
-
       const data = await res.json();
 
-      setDocs(data);
+      console.log("Documents response:", data);
+
+      // FIX: Railway response
+      if (data?.success && Array.isArray(data.data)) {
+
+        setDocs(data.data);
+
+      } else if (Array.isArray(data)) {
+
+        setDocs(data);
+
+      } else {
+
+        setDocs([]);
+
+      }
 
     } catch (err) {
 
       console.error("Load docs error:", err);
-      alert("Failed to load documents");
+      setDocs([]);
 
     } finally {
 
       setLoading(false);
+
     }
   };
 
 
 
-  // Add doc
+  // ================= ADD DOCUMENT =================
   const addDoc = async () => {
 
     if (!serviceId || !docName.trim()) {
-      return alert("Please fill all fields");
+
+      alert("Please fill all fields");
+      return;
+
     }
 
     try {
 
       setLoading(true);
 
-      const res = await fetch(
+      await fetch(
         `${process.env.REACT_APP_API_URL}/api/documents`,
         {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
             ...authHeaders,
           },
-
           body: JSON.stringify({
             service_id: serviceId,
             document_name: docName.trim(),
@@ -119,28 +142,27 @@ function Documents() {
         }
       );
 
-      if (!res.ok) throw new Error("Add failed");
-
       setDocName("");
 
-      await loadDocs(serviceId);
+      loadDocs(serviceId);
 
       alert("Document added successfully");
 
     } catch (err) {
 
-      console.error("Add doc error:", err);
+      console.error(err);
       alert("Failed to add document");
 
     } finally {
 
       setLoading(false);
+
     }
   };
 
 
 
-  // Delete doc
+  // ================= DELETE DOCUMENT =================
   const deleteDoc = async (id) => {
 
     if (!window.confirm("Delete this document?")) return;
@@ -149,7 +171,7 @@ function Documents() {
 
       setLoading(true);
 
-      const res = await fetch(
+      await fetch(
         `${process.env.REACT_APP_API_URL}/api/documents/${id}`,
         {
           method: "DELETE",
@@ -157,26 +179,27 @@ function Documents() {
         }
       );
 
-      if (!res.ok) throw new Error("Delete failed");
-
-      await loadDocs(serviceId);
+      loadDocs(serviceId);
 
       alert("Document deleted");
 
     } catch (err) {
 
-      console.error("Delete error:", err);
-      alert("Failed to delete document");
+      console.error(err);
+      alert("Delete failed");
 
     } finally {
 
       setLoading(false);
+
     }
   };
 
 
 
+  // ================= UI =================
   return (
+
     <div className="p-8 max-w-4xl mx-auto">
 
       <h2 className="text-2xl font-bold mb-6">
@@ -184,7 +207,7 @@ function Documents() {
       </h2>
 
 
-      {/* Add Form */}
+      {/* ADD FORM */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow mb-8">
 
         <div className="grid md:grid-cols-3 gap-4">
@@ -201,10 +224,12 @@ function Documents() {
 
             <option value="">Select Service</option>
 
-            {services.map(s => (
+            {Array.isArray(services) && services.map(s => (
+
               <option key={s.id} value={s.id}>
                 {s.name}
               </option>
+
             ))}
 
           </select>
@@ -221,7 +246,7 @@ function Documents() {
           <button
             onClick={addDoc}
             disabled={loading}
-            className="bg-blue-600 text-white rounded px-4 hover:bg-blue-700 transition disabled:opacity-50"
+            className="bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700"
           >
             {loading ? "Processing..." : "Add Document"}
           </button>
@@ -232,7 +257,7 @@ function Documents() {
 
 
 
-      {/* List */}
+      {/* DOCUMENT LIST */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
 
         <h3 className="font-semibold mb-4">
@@ -242,15 +267,11 @@ function Documents() {
 
         {loading ? (
 
-          <p className="text-gray-500">
-            Loading...
-          </p>
+          <p>Loading...</p>
 
-        ) : docs.length === 0 ? (
+        ) : !Array.isArray(docs) || docs.length === 0 ? (
 
-          <p className="text-gray-500">
-            No documents yet
-          </p>
+          <p>No documents yet</p>
 
         ) : (
 
@@ -267,7 +288,7 @@ function Documents() {
 
                 <button
                   onClick={() => deleteDoc(d.id)}
-                  className="text-red-600 hover:underline"
+                  className="text-red-600"
                 >
                   Delete
                 </button>
@@ -283,7 +304,9 @@ function Documents() {
       </div>
 
     </div>
+
   );
+
 }
 
 export default Documents;
