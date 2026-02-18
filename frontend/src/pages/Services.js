@@ -37,45 +37,45 @@ function Services() {
 
 
 
-  // ---------------- LOAD DOCUMENTS ----------------
-  const loadDocs = async (id) => {
+// ---------------- LOAD DOCUMENTS ----------------
+const loadDocs = async (id) => {
 
-    try {
+  try {
 
-      const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/documents/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URL}/api/documents/${id}`
+    );
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        setDocs([]);
-        setShow(true);
-        return;
-      }
+    console.log("Documents API response:", data);
 
-      if (Array.isArray(data)) {
-        setDocs(data);
-      } else if (data.data && Array.isArray(data.data)) {
-        setDocs(data.data);
-      } else {
-        setDocs([]);
-      }
+    // SAFE handling for Railway backend response
+    if (Array.isArray(data)) {
 
-      setShow(true);
+      setDocs(data);
 
-    } catch (err) {
+    } else if (data.success && Array.isArray(data.data)) {
 
-      console.error("Docs load failed:", err);
+      setDocs(data.data);
+
+    } else {
+
       setDocs([]);
-      setShow(true);
+
     }
-  };
+
+    setShow(true);
+
+  } catch (err) {
+
+    console.error("Docs load failed:", err);
+    setDocs([]);
+    setShow(true);
+
+  }
+};
+
 
 
 
@@ -220,7 +220,8 @@ function Services() {
 
               <ul className="space-y-2">
 
-                {docs.map(d => (
+                {Array.isArray(docs) && docs.map(d => (
+
 
                   <li
                     key={d.id}
