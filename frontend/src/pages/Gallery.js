@@ -16,7 +16,14 @@ function Gallery() {
       const res = await fetch(`${API}/api/gallery`);
       const data = await res.json();
 
-      setImages(data);
+      if (data.success && Array.isArray(data.data)) {
+  setImages(data.data);
+} else if (Array.isArray(data)) {
+  setImages(data);
+} else {
+  setImages([]);
+}
+
 
     } catch (err) {
       console.error("Gallery load error:", err);
@@ -40,7 +47,8 @@ function Gallery() {
 
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
-          {images.map(img => (
+          {Array.isArray(images) && images.map(img => (
+
 
             <div
               key={img.id}
